@@ -21,13 +21,8 @@ class LinkCollection implements ILinkCollection
      */
     public function add($url)
     {
-        $key = md5($url);
+        $this->links[] = $url;
 
-        if(isset($this->links[$key]))
-            return false;
-
-        $this->links[$key]['url']     = $url;
-        $this->links[$key]['crawled'] = false;
         return true;
     }
 
@@ -49,11 +44,12 @@ class LinkCollection implements ILinkCollection
      * @return mixed
      * @throws \Exception
      */
-    public function isCrawled($key)
+    public function isCrawled($link)
     {
-        if(!isset($this->links[$key]))
-            throw new \Exception("$key Key not set");
-
-        return $this->links[$key]['crawled'];
+        if (array_search($link, $this->links)) {
+            return true;
+        }
+        
+        return false;
     }
 }
