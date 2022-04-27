@@ -38,9 +38,7 @@ class SitemapService
     private function bulkAdd($links)
     {
         foreach($links as $link){
-            if(!$this->collection->exists($link)) {
-                $this->collection->add($link);
-            }
+            $this->collection->add($link);
         }
     }
 
@@ -59,16 +57,22 @@ class SitemapService
 
         $depth = $this->depth;
 
+        if (count($this->collection->links) >= $this->crawler->getPageLimit()) {
+            return $this->collection->links;
+        }
+
         if($depth > 0)
         {
             while($depth > 0)
             {
-                foreach($this->collection->links as $k => $link){
-                    if(!$this->collection->isCrawled($k)){
-
-                        $links = $this->crawler->process($link['url']);
+                foreach($this->collection->links as $link){
+                    if($this->collection->isCrawled($link)){
+                        $links = $this->crawler->process($link);
                         $this->bulkAdd($links);
-                        $this->collection->links[$k]['crawled'] = true;
+
+                        if (count($this->collection->links) >= $this->crawler->getPageLimit()) {
+                            return $this->collection->links;
+                        }
                     }
                 }
 
