@@ -29,7 +29,8 @@ class Crawler implements ICrawler
     {
         if(!isset($config['treat_trailing_slash_as_duplicate']) ||
            !isset($config['force_trailing_slash']) ||
-           !isset($config['depth'])
+           !isset($config['depth']) ||
+           !isset($config['page_limit'])
         )
             throw new \Exception('Invalid config file. Please double check it.');
 
@@ -44,6 +45,11 @@ class Crawler implements ICrawler
     public function getDepth()
     {
         return $this->config['depth'];
+    }
+
+    public function getPageLimit()
+    {
+        return $this->config['page_limit'];
     }
 
     /**
@@ -87,15 +93,7 @@ class Crawler implements ICrawler
         @$dom->loadHTML($this->fetch($url));
 
         $xPath = new \DOMXPath($dom);
-
-		if(isset($this->config['ignore_nofollow']) && $this->config['ignore_nofollow'] === true) {
-			$query = "//a[not(@rel) or @rel!='nofollow']/@href";
-		}
-		else {
-			$query = "//a/@href";
-		} 
-
-        $elements = $xPath->query($query);
+        $elements = $xPath->query("//a/@href");
 
 
         foreach ($elements as $e)
