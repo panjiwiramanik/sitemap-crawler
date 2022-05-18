@@ -56,31 +56,35 @@ class SitemapService
         $this->bulkAdd($links);
 
         $depth = $this->depth;
+        
+        if ($this->collection && $this->collection->links && ) {
+            if (count($this->collection->links) >= $this->crawler->getPageLimit()) {
+                return $this->collection->links;
+            }
 
-        if ($this->collection && $this->collection->links && count($this->collection->links) >= $this->crawler->getPageLimit()) {
-            return $this->collection->links;
-        }
-
-        if($depth > 0)
-        {
-            while($depth > 0)
+            if($depth > 0)
             {
-                foreach($this->collection->links as $link){
-                    if($this->collection->isCrawled($link)){
-                        $links = $this->crawler->process($link);
-                        $this->bulkAdd($links);
+                while($depth > 0)
+                {
+                    foreach($this->collection->links as $link){
+                        if($this->collection->isCrawled($link)){
+                            $links = $this->crawler->process($link);
+                            $this->bulkAdd($links);
 
-                        if ($this->collection && $this->collection->links && count($this->collection->links) >= $this->crawler->getPageLimit()) {
-                            return $this->collection->links;
+                            if ($this->collection && $this->collection->links && count($this->collection->links) >= $this->crawler->getPageLimit()) {
+                                return $this->collection->links;
+                            }
                         }
                     }
+
+                    $depth--;
                 }
-
-                $depth--;
             }
-        }
 
-        return $this->collection->links;
+            return $this->collection->links;
+        } else {
+            return [];
+        }
     }
 
     /**
