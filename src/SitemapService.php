@@ -57,7 +57,7 @@ class SitemapService
 
         $depth = $this->depth;
         
-        if ($this->collection && $this->collection->links && ) {
+        if ($this->collection && $this->collection->links) {
             if (count($this->collection->links) >= $this->crawler->getPageLimit()) {
                 return $this->collection->links;
             }
