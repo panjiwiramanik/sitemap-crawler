@@ -57,7 +57,7 @@ class SitemapService
 
         $depth = $this->depth;
 
-        if (count($this->collection->links) >= $this->crawler->getPageLimit()) {
+        if ($this->collection && $this->collection->links && count($this->collection->links) >= $this->crawler->getPageLimit()) {
             return $this->collection->links;
         }
 
@@ -70,7 +70,7 @@ class SitemapService
                         $links = $this->crawler->process($link);
                         $this->bulkAdd($links);
 
-                        if (count($this->collection->links) >= $this->crawler->getPageLimit()) {
+                        if ($this->collection && $this->collection->links && count($this->collection->links) >= $this->crawler->getPageLimit()) {
                             return $this->collection->links;
                         }
                     }
