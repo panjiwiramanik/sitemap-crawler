@@ -114,67 +114,70 @@ class Crawler implements ICrawler
      */
     private function filter($baseURL)
     {
-        //trim whitespaces
-        $urls = array_map('trim', $this->links);
+        try {
+            //trim whitespaces
+            $urls = array_map('trim', $this->links);
 
-        if($this->config['treat_trailing_slash_as_duplicate'])
-        {
-            $force_trailing_slash = $this->config['force_trailing_slash'];
-            $urls = array_map(function ($el) use ($force_trailing_slash){
+            if($this->config['treat_trailing_slash_as_duplicate'])
+            {
+                $force_trailing_slash = $this->config['force_trailing_slash'];
+                $urls = array_map(function ($el) use ($force_trailing_slash){
 
-                //removing then adding, in case it was already there, we wont duplicate it
-                $r = rtrim($el, '/');
+                    //removing then adding, in case it was already there, we wont duplicate it
+                    $r = rtrim($el, '/');
 
-                if($force_trailing_slash)
-                    $r .= '/';
+                    if($force_trailing_slash)
+                        $r .= '/';
 
-                return $r;
-            }, $urls);
+                    return $r;
+                }, $urls);
+            }
+
+            //first remove all starting with # hash
+            $urls = array_filter($urls, function($el) {
+                return strlen($el) > 0 && $el[0] != '#';
+            });
+
+            //remove duplicates
+            $urls = array_unique( $urls, SORT_STRING );
+
+            $myHost   = parse_url($baseURL, PHP_URL_HOST);
+            $myScheme = parse_url($baseURL, PHP_URL_SCHEME);
+
+            $return = [];
+
+            foreach($urls as $k => $el) {
+
+                //full link, no need to add anything. Just check if link is from the same domain
+                if(substr($el, 0, 4) == 'http') {
+
+                    if($myHost == parse_url($el, PHP_URL_HOST))
+                        $return[] = $el;
+
+                    continue;
+                }
+
+                //force current selected scheme in the sitemap file
+                if(substr($el, 0, 2) == '//') {
+
+                    $return[] = $myScheme . ':' . $el;
+                    continue;
+                }
+
+                //absolute path links
+                elseif($el[0] == '/') {
+
+                    $return[] = $myScheme . '://' . $myHost . $el;
+                    continue;
+                }
+
+
+                $return[] = $myScheme . '://' . $myHost . '/' . $el;
+            }
+
+            $this->links = $return;
+        } catch (\Exception $e) {
         }
-
-        //first remove all starting with # hash
-        $urls = array_filter($urls, function($el) {
-            return strlen($el) > 0 && $el[0] != '#';
-        });
-
-        //remove duplicates
-        $urls = array_unique( $urls, SORT_STRING );
-
-        $myHost   = parse_url($baseURL, PHP_URL_HOST);
-        $myScheme = parse_url($baseURL, PHP_URL_SCHEME);
-
-        $return = [];
-
-        foreach($urls as $k => $el) {
-
-            //full link, no need to add anything. Just check if link is from the same domain
-            if(substr($el, 0, 4) == 'http') {
-
-                if($myHost == parse_url($el, PHP_URL_HOST))
-                    $return[] = $el;
-
-                continue;
-            }
-
-            //force current selected scheme in the sitemap file
-            if(substr($el, 0, 2) == '//') {
-
-                $return[] = $myScheme . ':' . $el;
-                continue;
-            }
-
-            //absolute path links
-            elseif($el[0] == '/') {
-
-                $return[] = $myScheme . '://' . $myHost . $el;
-                continue;
-            }
-
-
-            $return[] = $myScheme . '://' . $myHost . '/' . $el;
-        }
-
-        $this->links = $return;
     }
 
     /**
