@@ -89,15 +89,18 @@ class Crawler implements ICrawler
      */
     private function parse($url)
     {
-        $dom = new \DOMDocument();
-        @$dom->loadHTML($this->fetch($url));
+        try {
+            $dom = new \DOMDocument();
+            @$dom->loadHTML($this->fetch($url));
 
-        $xPath = new \DOMXPath($dom);
-        $elements = $xPath->query("//a/@href");
+            $xPath = new \DOMXPath($dom);
+            $elements = $xPath->query("//a/@href");
 
 
-        foreach ($elements as $e)
-            $this->links[] = $e->nodeValue;
+            foreach ($elements as $e)
+                $this->links[] = $e->nodeValue;
+        } catch(\Exception $e) {
+        }
     }
 
     /**
