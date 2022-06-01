@@ -60,25 +60,29 @@ class Crawler implements ICrawler
      */
     private function fetch($url)
     {
-        $options = [
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_USERAGENT      => 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HEADER         => false,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_ENCODING       => "",
-            CURLOPT_AUTOREFERER    => true,
-            CURLOPT_CONNECTTIMEOUT => 60,
-            CURLOPT_TIMEOUT        => 60,
-            CURLOPT_MAXREDIRS      => 10
-        ];
+        try {
+            $options = [
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_USERAGENT      => 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER         => false,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_ENCODING       => "",
+                CURLOPT_AUTOREFERER    => true,
+                CURLOPT_CONNECTTIMEOUT => 60,
+                CURLOPT_TIMEOUT        => 60,
+                CURLOPT_MAXREDIRS      => 10
+            ];
 
-        $ch = curl_init( $url );
-        curl_setopt_array( $ch, $options );
-        $content = curl_exec( $ch );
-        curl_close( $ch );
+            $ch = curl_init( $url );
+            curl_setopt_array( $ch, $options );
+            $content = curl_exec( $ch );
+            curl_close( $ch );
 
-        return $content;
+            return $content;
+        } catch(\Exception $e) {
+            return '';
+        }
     }
 
 
