@@ -20,3 +20,5 @@ $provider   = new SitemapService($crawler, $collection);
 $links = $provider->crawl($url);
 $provider->export('monthly');
 
+echo 'DONE';
+
