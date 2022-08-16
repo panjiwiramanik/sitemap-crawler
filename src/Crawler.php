@@ -91,7 +91,7 @@ class Crawler implements ICrawler
      *
      * @param $url string link to parse for other links
      */
-    private function parse($url)
+    private function parse($url, $urlParseSource = null)
     {
         try {
             $dom = new \DOMDocument();
@@ -101,8 +101,15 @@ class Crawler implements ICrawler
             $elements = $xPath->query("//a/@href");
 
 
-            foreach ($elements as $e)
-                $this->links[] = $e->nodeValue;
+            foreach ($elements as $e) {
+                if ($urlParseSource) {
+                    if ($urlParseSource == parse_url($e->nodeValue, PHP_URL_HOST)) {
+                        $this->links[] = $e->nodeValue;
+                    }
+                } else {
+                    $this->links[] = $e->nodeValue;
+                }
+            }
         } catch(\Exception $e) {
         }
     }
@@ -186,12 +193,12 @@ class Crawler implements ICrawler
      * @param $url
      * @return array
      */
-    public function process($url)
+    public function process($url, $urlParseSource = null)
     {
         $this->links = [];
 
-        $this->parse($url);
-        $this->filter($url);
+        $this->parse($url, $urlParseSource);
+        // $this->filter($url);
 
         return $this->links;
     }
