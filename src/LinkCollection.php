@@ -22,9 +22,7 @@ class LinkCollection implements ILinkCollection
      */
     public function add($url)
     {
-        if (!$this->exists(rtrim($url, '/')) && !$this->exists($url)) {
-            $this->links[] = $url;
-        }
+        $this->links[] = rtrim($url, '/');
 
         return true;
     }
@@ -50,7 +48,7 @@ class LinkCollection implements ILinkCollection
      */
     public function exists($url)
     {
-        if (array_search($link, $this->links)) {
+        if ($this->links && array_search($url, $this->links)) {
             return true;
         }
         
