@@ -22,7 +22,9 @@ class LinkCollection implements ILinkCollection
      */
     public function add($url)
     {
-        $this->links[] = $url;
+        if (!$this->exists(rtrim($url, '/')) && !$this->exists($url)) {
+            $this->links[] = $url;
+        }
 
         return true;
     }
