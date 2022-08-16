@@ -12,6 +12,7 @@ class LinkCollection implements ILinkCollection
      * @var array
      */
     public $links;
+    public $linksAlreadyCrawled;
 
     /**
      * Add only new links to the collection
@@ -27,6 +28,19 @@ class LinkCollection implements ILinkCollection
     }
 
     /**
+     * Add only new links to the collection
+     *
+     * @param $url
+     * @return bool
+     */
+    public function addAlready($url)
+    {
+        $this->linksAlreadyCrawled[] = $url;
+
+        return true;
+    }
+
+    /**
      * Check if link is already in the collection
      *
      * @param $url
@@ -34,7 +48,11 @@ class LinkCollection implements ILinkCollection
      */
     public function exists($url)
     {
-        return isset($this->links[ md5($url) ]);
+        if (array_search($link, $this->links)) {
+            return true;
+        }
+        
+        return false;
     }
 
     /**
@@ -46,7 +64,7 @@ class LinkCollection implements ILinkCollection
      */
     public function isCrawled($link)
     {
-        if (array_search($link, $this->links)) {
+        if (array_search($link, $this->linksAlreadyCrawled)) {
             return true;
         }
         
