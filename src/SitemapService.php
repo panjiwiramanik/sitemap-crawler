@@ -37,12 +37,43 @@ class SitemapService
      */
     private function bulkAdd($links, $urlCrawlSource = null)
     {
-        foreach ($links as $link) {
+        $myHost   = parse_url($urlCrawlSource, PHP_URL_HOST);
+        $myScheme = parse_url($urlCrawlSource, PHP_URL_SCHEME);
+
+        foreach ($links as $l => $link) {
             $urlCrawlTarget = parse_url($link, PHP_URL_HOST);
-            if ($urlCrawlSource == $urlCrawlTarget) {
-                $this->collection->add($link);
+            if ($myHost == $urlCrawlTarget) {
+                if(str_contains($link, 'mailto:')) { 
+                    continue;
+                }
+
+                if(substr($link, 0, 4) == 'http') {
+                    if($myHost == parse_url($link, PHP_URL_HOST))
+                        $this->collection->add($link);
+                    
+                    continue;
+                }
+
+                if(substr($link, 0, 2) == '//') {
+                    $this->collection->add($return[] = $myScheme . ':' . $link);
+                    continue;
+                }
+
+                //absolute path links
+                if($link[0] == '/') {
+                    $this->collection->add($return[] = $myScheme . '://' . $myHost . $link);
+                    continue;
+                }
+
+                $this->collection->add($myScheme . '://' . $myHost . '/' . $link);
             }
         }
+
+        $this->collection->links = array_map('trim', $this->collection->links);
+
+        $this->collection->links = array_filter($this->collection->links, function($el) {
+            return strlen($el) > 0 && $el[0] != '#';
+        });
 
         uasort($this->collection->links, 'sortByLength');
         $this->collection->links = array_values(array_unique($this->collection->links));
@@ -67,7 +98,7 @@ class SitemapService
         $this->collection->add($url);
         $this->collection->addAlready($url);
         
-        $this->bulkAdd($links, $urlCrawlSource);
+        $this->bulkAdd($links, $url);
 
         $depth = $this->depth;
         
@@ -85,7 +116,7 @@ class SitemapService
                         if ($urlCrawlTarget === $urlCrawlSource && !$this->collection->isCrawled($link)) {    
                             $links = $this->crawler->process($link, $urlCrawlSource);
 
-                            $this->bulkAdd($links, $urlCrawlSource);
+                            $this->bulkAdd($links, $url);
                             $this->collection->addAlready($link);
 
                             if ($this->collection && $this->collection->links && count($this->collection->links) >= $this->crawler->getPageLimit()) {
