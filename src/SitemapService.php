@@ -40,40 +40,36 @@ class SitemapService
         $myHost   = parse_url($urlCrawlSource, PHP_URL_HOST);
         $myScheme = parse_url($urlCrawlSource, PHP_URL_SCHEME);
 
-        foreach ($links as $l => $link) {
-            $urlCrawlTarget = parse_url($link, PHP_URL_HOST);
-            if ($myHost == $urlCrawlTarget) {
-                if(str_contains($link, 'mailto:')) { 
-                    continue;
-                }
-
-                if(substr($link, 0, 4) == 'http') {
-                    if($myHost == parse_url($link, PHP_URL_HOST))
-                        $this->collection->add($link);
-                    
-                    continue;
-                }
-
-                if(substr($link, 0, 2) == '//') {
-                    $this->collection->add($return[] = $myScheme . ':' . $link);
-                    continue;
-                }
-
-                //absolute path links
-                if($link[0] == '/') {
-                    $this->collection->add($return[] = $myScheme . '://' . $myHost . $link);
-                    continue;
-                }
-
-                $this->collection->add($myScheme . '://' . $myHost . '/' . $link);
-            }
-        }
-
-        $this->collection->links = array_map('trim', $this->collection->links);
-
-        $this->collection->links = array_filter($this->collection->links, function($el) {
+        $links = array_map('trim', $links);
+        $links = array_filter($links, function($el) {
             return strlen($el) > 0 && $el[0] != '#';
         });
+
+        foreach ($links as $l => $link) {
+            if(str_contains($link, 'mailto:')) { 
+                continue;
+            }
+
+            if(substr($link, 0, 4) == 'http') {
+                if($myHost == parse_url($link, PHP_URL_HOST))
+                    $this->collection->add($link);
+                
+                continue;
+            }
+
+            if(substr($link, 0, 2) == '//') {
+                $this->collection->add($return[] = $myScheme . ':' . $link);
+                continue;
+            }
+
+            //absolute path links
+            if($link[0] == '/') {
+                $this->collection->add($return[] = $myScheme . '://' . $myHost . $link);
+                continue;
+            }
+
+            $this->collection->add($myScheme . '://' . $myHost . '/' . $link);
+        }
 
         uasort($this->collection->links, 'sortByLength');
         $this->collection->links = array_values(array_unique($this->collection->links));
